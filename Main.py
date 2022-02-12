@@ -16,6 +16,7 @@ class MyParameters(object):
     batch_size = 20
     time_steps = 30
     sliding_window = 30
+    test_mode = False
 
 def ReadCorpus(file_name, words, vocab, params, src):
     if src == 0:
@@ -217,7 +218,9 @@ def train_epoch(data, model, optimizer, args, device, clip_grads):
             perplexity = 2 ** prob.log2().neg().mean().item()
             entropy_sum += prob.log2().neg().sum().item()
             word_count += y.data.shape[0]
-            print("\tBatch %d, loss %.3f, perplexity %.2f", batch_ind, loss.item(), perplexity)
+            print("\tBatch {0}, loss {1}, perplexity {2}", batch_ind, loss.item(), perplexity)
+            if args.test_mode:
+                break
     return 2 ** (entropy_sum / word_count)
 
 def evaluate(data, model, args, device):
@@ -232,6 +235,8 @@ def evaluate(data, model, args, device):
                 torch.arange(0, y.data.shape[0], dtype=torch.int64), y.data]
             entropy_sum += prob.log2().neg().sum().item()
             word_count += y.data.shape[0]
+            if args.test_mode:
+                break
     return 2 ** (entropy_sum / word_count)
 
 params = MyParameters()
@@ -246,7 +251,7 @@ optimizer_1 = optim.Adam(model_1.parameters(), lr=params.lr)
 model_2 = LSTM_Language_Model(vocab_size=len(vocab), embedding_dim = params.dim, hidden_dim = params.dim, lstm_layers = 2, dropout = 0.1).to(device)
 optimizer_2 = optim.Adam(model_2.parameters(), lr=params.lr)
 
-def train_and_plot(train, valid, test, model, optimizer, params, device, clip_grads):
+def train_and_plot(train, valid, test, model, optimizer, params, device, clip_grads, model_name):
     train_perpexity = []
     valid_perpexity = []
     test_perplexity = []
@@ -259,18 +264,19 @@ def train_and_plot(train, valid, test, model, optimizer, params, device, clip_gr
         test_loss = evaluate(test, model, params, device)
         test_perplexity.append(test_loss)
         epochs_hist.append(epoch_ind)
-        print("Epoch: {0}, Train Perplexity: {1}, Valid Perplexity: {2}, Test Perplexity: {3}".format(epoch_ind, train_loss, valid_loss, test_loss))
+        print("Epoch: {0}, Train Perplexity: {1}, Valid Perplexity: {2}, Test Perplexity: {3}".format(epoch_ind, train_loss, valid_loss, test_loss), '\n')
 
     # plot lines
     plt.plot(epochs_hist, train_perpexity, label="Train")
     plt.plot(epochs_hist, valid_perpexity, label="Validation")
     plt.plot(epochs_hist, valid_perpexity, label="Test")
     plt.legend()
+    plt.title(model_name)
     plt.show()
 
 if __name__ == '__main__':
-    train_and_plot(train, valid, test, model_1, optimizer_1, params, device, False)
-    train_and_plot(train, valid, test, model_2, optimizer_2, params, device, True)
+    train_and_plot(train, valid, test, model_1, optimizer_1, params, device, False, "rnn model")
+    train_and_plot(train, valid, test, model_2, optimizer_2, params, device, True, "lstm model")
 
 # a = batches(train, 20, 30, 30)
 # for n, i in enumerate(a):
