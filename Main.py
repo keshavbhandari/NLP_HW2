@@ -268,8 +268,9 @@ def train_and_plot(train, valid, test, model, optimizer, params, device, clip_gr
     plt.legend()
     plt.show()
 
-train_and_plot(train, valid, test, model_1, optimizer_1, params, device, False)
-train_and_plot(train, valid, test, model_2, optimizer_2, params, device, True)
+if __name__ == '__main__':
+    train_and_plot(train, valid, test, model_1, optimizer_1, params, device, False)
+    train_and_plot(train, valid, test, model_2, optimizer_2, params, device, True)
 
 # a = batches(train, 20, 30, 30)
 # for n, i in enumerate(a):
