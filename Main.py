@@ -269,7 +269,7 @@ def train_and_plot(train, valid, test, model, optimizer, params, device, clip_gr
     # plot lines
     plt.plot(epochs_hist, train_perpexity, label="Train")
     plt.plot(epochs_hist, valid_perpexity, label="Validation")
-    plt.plot(epochs_hist, valid_perpexity, label="Test")
+    plt.plot(epochs_hist, test_perplexity, label="Test")
     plt.legend()
     plt.title(model_name)
     plt.show()
