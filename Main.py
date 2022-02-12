@@ -248,7 +248,7 @@ test, words, vocab, test_g = ReadCorpus("wiki.test.txt", words, vocab, params, 2
 model_1 = RNN_Language_Model(vocab_size=len(vocab), embedding_dim = params.dim, hidden_dim = params.dim, gru_layers = 1, dropout = 0.0).to(device)
 optimizer_1 = optim.Adam(model_1.parameters(), lr=params.lr)
 
-model_2 = LSTM_Language_Model(vocab_size=len(vocab), embedding_dim = params.dim, hidden_dim = params.dim, lstm_layers = 2, dropout = 0.1).to(device)
+model_2 = LSTM_Language_Model(vocab_size=len(vocab), embedding_dim = params.dim, hidden_dim = params.dim, lstm_layers = 2, dropout = 0.2).to(device)
 optimizer_2 = optim.Adam(model_2.parameters(), lr=params.lr)
 
 def train_and_plot(train, valid, test, model, optimizer, params, device, clip_grads, model_name):
