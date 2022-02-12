@@ -7,14 +7,12 @@ import matplotlib.pyplot as plt
 
 class MyParameters(object):
 
-    dim = 200
+    dim = 100
     threshold = 3
-    max_epochs = 1
+    max_epochs = 20
     clip = 1
     num_layers = 2
-
-    vocab_size = 0
-    gpu_mem = 0.90
+    lr = 0.001
     batch_size = 20
     time_steps = 30
     sliding_window = 30
@@ -212,7 +210,7 @@ def train_epoch(data, model, optimizer, args, device, clip_grads):
         if clip_grads:
             torch.nn.utils.clip_grad_norm_(model.parameters(), args.clip)
         optimizer.step()
-        if batch_ind % 5 == 0:
+        if batch_ind % 50 == 0:
             # Calculate perplexity.
             prob = out.exp()[
                 torch.arange(0, y.data.shape[0], dtype=torch.int64), y.data]
@@ -242,11 +240,11 @@ train, words, vocab, train_g = ReadCorpus("wiki.train.txt", None, None, params, 
 valid, words, vocab, valid_g = ReadCorpus("wiki.valid.txt", words, vocab, params, 1)
 test, words, vocab, test_g = ReadCorpus("wiki.test.txt", words, vocab, params, 2)
 
-model_1 = RNN_Language_Model(vocab_size=len(vocab), embedding_dim = 100, hidden_dim = 100, gru_layers = 1, dropout = 0.0).to(device)
-optimizer_1 = optim.Adam(model_1.parameters(), lr=0.001)
+model_1 = RNN_Language_Model(vocab_size=len(vocab), embedding_dim = params.dim, hidden_dim = params.dim, gru_layers = 1, dropout = 0.0).to(device)
+optimizer_1 = optim.Adam(model_1.parameters(), lr=params.lr)
 
-model_2 = LSTM_Language_Model(vocab_size=len(vocab), embedding_dim = 100, hidden_dim = 100, lstm_layers = 2, dropout = 0.1).to(device)
-optimizer_2 = optim.Adam(model_2.parameters(), lr=0.001)
+model_2 = LSTM_Language_Model(vocab_size=len(vocab), embedding_dim = params.dim, hidden_dim = params.dim, lstm_layers = 2, dropout = 0.1).to(device)
+optimizer_2 = optim.Adam(model_2.parameters(), lr=params.lr)
 
 def train_and_plot(train, valid, test, model, optimizer, params, device, clip_grads):
     train_perpexity = []
@@ -270,7 +268,7 @@ def train_and_plot(train, valid, test, model, optimizer, params, device, clip_gr
     plt.legend()
     plt.show()
 
-# train_and_plot(train, valid, test, model_1, optimizer_1, params, device, False)
+train_and_plot(train, valid, test, model_1, optimizer_1, params, device, False)
 train_and_plot(train, valid, test, model_2, optimizer_2, params, device, True)
 
 # a = batches(train, 20, 30, 30)
