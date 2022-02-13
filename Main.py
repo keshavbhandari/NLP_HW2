@@ -239,18 +239,6 @@ def evaluate(data, model, args, device):
                 break
     return 2 ** (entropy_sum / word_count)
 
-params = MyParameters()
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-train, words, vocab, train_g = ReadCorpus("wiki.train.txt", None, None, params, 0)
-valid, words, vocab, valid_g = ReadCorpus("wiki.valid.txt", words, vocab, params, 1)
-test, words, vocab, test_g = ReadCorpus("wiki.test.txt", words, vocab, params, 2)
-
-model_1 = RNN_Language_Model(vocab_size=len(vocab), embedding_dim = params.dim, hidden_dim = params.dim, gru_layers = 1, dropout = 0.0).to(device)
-optimizer_1 = optim.Adam(model_1.parameters(), lr=params.lr)
-
-model_2 = LSTM_Language_Model(vocab_size=len(vocab), embedding_dim = params.dim, hidden_dim = params.dim, lstm_layers = 2, dropout = 0.2).to(device)
-optimizer_2 = optim.Adam(model_2.parameters(), lr=params.lr)
-
 def train_and_plot(train, valid, test, model, optimizer, params, device, clip_grads, model_name):
     train_perpexity = []
     valid_perpexity = []
@@ -273,6 +261,24 @@ def train_and_plot(train, valid, test, model, optimizer, params, device, clip_gr
     plt.legend()
     plt.title(model_name)
     plt.show()
+
+def init_weights(m):
+    if type(m) == nn.Linear:
+        torch.nn.init.uniform_(m.weight, -0.1, 0.1)
+
+params = MyParameters()
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+train, words, vocab, train_g = ReadCorpus("wiki.train.txt", None, None, params, 0)
+valid, words, vocab, valid_g = ReadCorpus("wiki.valid.txt", words, vocab, params, 1)
+test, words, vocab, test_g = ReadCorpus("wiki.test.txt", words, vocab, params, 2)
+
+model_1 = RNN_Language_Model(vocab_size=len(vocab), embedding_dim = params.dim, hidden_dim = params.dim, gru_layers = 1, dropout = 0.0).to(device)
+model_1.apply(init_weights)
+optimizer_1 = optim.Adam(model_1.parameters(), lr=params.lr)
+
+model_2 = LSTM_Language_Model(vocab_size=len(vocab), embedding_dim = params.dim, hidden_dim = params.dim, lstm_layers = 2, dropout = 0.2).to(device)
+model_2.apply(init_weights)
+optimizer_2 = optim.Adam(model_2.parameters(), lr=params.lr)
 
 if __name__ == '__main__':
     train_and_plot(train, valid, test, model_1, optimizer_1, params, device, False, "rnn model")
